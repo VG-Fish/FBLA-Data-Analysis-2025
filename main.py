@@ -35,6 +35,63 @@ Nitrogen dioxide (NO2)
 Fine particles (PM 2.5)
 """
 
+time_mappings = {
+    "2005": 0,
+    "2005-2007": 1,
+    "Winter 2008-09": 2,
+    "Annual Average 2009": 3,
+    "Summer 2009": 4,
+    "Winter 2009-10": 5,
+    "2009-2011": 6,
+    "2-Year Summer Average 2009-2010": 7,
+    "Annual Average 2010": 8,
+    "Summer 2010": 9,
+    "Winter 2010-11": 10,
+    "2010": 11,
+    "Annual Average 2011": 12,
+    "Summer 2011": 13,
+    "Winter 2011-12": 14,
+    "2011": 15,
+    "Annual Average 2012": 16,
+    "Summer 2012": 17,
+    "Winter 2012-13": 18,
+    "2012-2014": 19,
+    "Annual Average 2013": 20,
+    "Summer 2013": 21,
+    "Winter 2013-14": 22,
+    "2013": 23,
+    "Annual Average 2014": 24,
+    "Summer 2014": 25,
+    "Winter 2014-15": 26,
+    "2014": 27,
+    "Annual Average 2015": 28,
+    "Summer 2015": 29,
+    "Winter 2015-16": 30,
+    "2015": 31,
+    "2015-2017": 32,
+    "Annual Average 2016": 33,
+    "Summer 2016": 34,
+    "Winter 2016-17": 35,
+    "Annual Average 2017": 36,
+    "Summer 2017": 37,
+    "Winter 2017-18": 38,
+    "2017-2019": 39,
+    "Annual Average 2018": 40,
+    "Summer 2018": 41,
+    "Winter 2018-19": 42,
+    "Annual Average 2019": 43,
+    "Summer 2019": 44,
+    "Winter 2019-20": 45,
+    "Annual Average 2020": 46,
+    "Summer 2020": 47,
+    "Winter 2020-21": 48,
+    "Annual Average 2021": 49,
+    "Summer 2021": 50,
+    "Winter 2021-22": 51,
+    "Annual Average 2022": 52,
+    "Summer 2022": 53,
+}
+
 # Group by time period and location
 trends = data.group_by(["Name", "Geo Place Name", "Time Period"]).agg([
     pl.col("Data Value").mean().alias("avg_value"),
@@ -91,5 +148,5 @@ app.layout = dash.html.Div([
 ])
 
 
-if __name__ == '__main__':
-    app.run_server(debug=True)
+# if __name__ == '__main__':
+#     app.run_server(debug=True)
