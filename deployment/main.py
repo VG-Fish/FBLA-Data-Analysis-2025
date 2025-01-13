@@ -3,7 +3,7 @@ from dash import html
 import dash_bootstrap_components as dbc
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
-server = app.server  # This is the Flask server
+server = app.server
 
 def read_html_file(file_path):
     with open(file_path, 'r') as file:
