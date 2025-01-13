@@ -5,7 +5,7 @@
         "src": "main.py",
         "use": "@vercel/python",
         "config": {
-          "excludeFiles": ["index.py"]
+          "excludeFiles": ["index.py", "figure0.html", "figure1.html", "figure2.html", "figure3.html", "figure4.html", "figure5.html"]
         }
       }
     ],
