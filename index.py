@@ -3,7 +3,7 @@ import plotly.express as px
 import dash
 
 # Load CSV
-data = pl.read_csv("https://data.cityofnewyork.us/api/views/c3uy-2p5r/rows.csv?accessType=DOWNLOAD")
+data = pl.read_csv("Air_Quality.csv")
 
 # Cleaning up the data.
 # NOTE: There are no nulls in the data.
