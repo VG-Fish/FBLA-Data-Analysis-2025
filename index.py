@@ -143,26 +143,11 @@ def plot_trends(trends_data: pl.DataFrame, pollutant_name: str):
         xaxis={
             'categoryorder': 'array',
             'categoryarray': time_periods
-        },
-        updatemenus=[
-            {
-                'buttons': [
-                    {
-                        'label': 'Select All',
-                        'method': 'update',
-                        'args': [{'visible': [True] * len(df['Geo Place Name'].unique())}]
-                    },
-                    {
-                        'label': 'Deselect All',
-                        'method': 'update',
-                        'args': [{'visible': [False] * len(df['Geo Place Name'].unique())}]
-                    }
-                ],
-                'direction': 'down',
-                'showactive': False,
-            }
-        ]
+        }
     )
+
+    for trace in fig.data:
+        trace.visible = "legendonly"
     
     # Rotate x-axis labels for readability
     fig.update_xaxes(tickangle=45)
