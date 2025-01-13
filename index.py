@@ -3,7 +3,7 @@ import plotly.express as px
 import dash
 
 # Load CSV
-data = pl.read_csv("Air_Quality.csv")
+data = pl.read_csv("https://data.cityofnewyork.us/api/views/c3uy-2p5r/rows.csv?accessType=DOWNLOAD")
 
 # Cleaning up the data.
 # NOTE: There are no nulls in the data.
@@ -183,6 +183,8 @@ app.layout = dash.html.Div([
         for i in range(0, len(figures), 2)
     ], style={"height": "100vh", "overflowY": "scroll"})
 ])
+
+server = app.server
 
 if __name__ == "__main__":
     app.run_server(debug=True)
