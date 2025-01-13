@@ -1,2 +1,2 @@
-dash
-dash_bootstrap_components
+dash==2.x.x
+dash_bootstrap_components==1.x.x
