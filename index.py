@@ -95,7 +95,7 @@ time_mappings = {time_order[time]: time for time in range(len(time_order))}
 
 # Add time_order column for sorting
 sorted_data = data.with_columns(
-    pl.col("Time Period").replace(time_mappings).str.to_integer().alias("time_order")
+    pl.col("Time Period").replace(time_mappings, return_dtype=pl.UInt8).alias("time_order")
 ).sort("time_order")
 
 # Group by time period and location
@@ -143,7 +143,25 @@ def plot_trends(trends_data: pl.DataFrame, pollutant_name: str):
         xaxis={
             'categoryorder': 'array',
             'categoryarray': time_periods
-        }
+        },
+        updatemenus=[
+            {
+                'buttons': [
+                    {
+                        'label': 'Select All',
+                        'method': 'update',
+                        'args': [{'visible': [True] * len(df['Geo Place Name'].unique())}]
+                    },
+                    {
+                        'label': 'Deselect All',
+                        'method': 'update',
+                        'args': [{'visible': [False] * len(df['Geo Place Name'].unique())}]
+                    }
+                ],
+                'direction': 'down',
+                'showactive': False,
+            }
+        ]
     )
     
     # Rotate x-axis labels for readability
