@@ -3,6 +3,7 @@ from dash import html
 import dash_bootstrap_components as dbc
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+server = app.server  # This is the Flask server
 
 def read_html_file(file_path):
     with open(file_path, 'r') as file:
@@ -11,10 +12,12 @@ def read_html_file(file_path):
 app.layout = html.Div([
     html.H1("Graphs"),
     dbc.Row([
-        dbc.Col(html.Iframe(srcDoc=read_html_file(f'figure{i}.html'), style={'width': '100%', 'height': '400px'}), 
+        dbc.Col(html.Iframe(srcDoc=read_html_file(f'figure{i}.html'), 
+                style={'width': '100%', 'height': '400px'}), 
                 width=6, className='mb-4')
         for i in range(6)
     ])
 ])
 
-server = app.server
+if __name__ == '__main__':
+    app.run_server(debug=True)
