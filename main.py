@@ -2,7 +2,6 @@ import polars as pl
 import plotly.express as px
 import dash
 
-
 # Load CSV
 data = pl.read_csv("Air_Quality.csv")
 
@@ -35,118 +34,155 @@ Nitrogen dioxide (NO2)
 Fine particles (PM 2.5)
 """
 
-time_mappings = {
-    "2005": 0,
-    "2005-2007": 1,
-    "Winter 2008-09": 2,
-    "Annual Average 2009": 3,
-    "Summer 2009": 4,
-    "Winter 2009-10": 5,
-    "2009-2011": 6,
-    "2-Year Summer Average 2009-2010": 7,
-    "Annual Average 2010": 8,
-    "Summer 2010": 9,
-    "Winter 2010-11": 10,
-    "2010": 11,
-    "Annual Average 2011": 12,
-    "Summer 2011": 13,
-    "Winter 2011-12": 14,
-    "2011": 15,
-    "Annual Average 2012": 16,
-    "Summer 2012": 17,
-    "Winter 2012-13": 18,
-    "2012-2014": 19,
-    "Annual Average 2013": 20,
-    "Summer 2013": 21,
-    "Winter 2013-14": 22,
-    "2013": 23,
-    "Annual Average 2014": 24,
-    "Summer 2014": 25,
-    "Winter 2014-15": 26,
-    "2014": 27,
-    "Annual Average 2015": 28,
-    "Summer 2015": 29,
-    "Winter 2015-16": 30,
-    "2015": 31,
-    "2015-2017": 32,
-    "Annual Average 2016": 33,
-    "Summer 2016": 34,
-    "Winter 2016-17": 35,
-    "Annual Average 2017": 36,
-    "Summer 2017": 37,
-    "Winter 2017-18": 38,
-    "2017-2019": 39,
-    "Annual Average 2018": 40,
-    "Summer 2018": 41,
-    "Winter 2018-19": 42,
-    "Annual Average 2019": 43,
-    "Summer 2019": 44,
-    "Winter 2019-20": 45,
-    "Annual Average 2020": 46,
-    "Summer 2020": 47,
-    "Winter 2020-21": 48,
-    "Annual Average 2021": 49,
-    "Summer 2021": 50,
-    "Winter 2021-22": 51,
-    "Annual Average 2022": 52,
-    "Summer 2022": 53,
-}
+time_order = """2005
+2005-2007
+Winter 2008-09
+Summer 2009
+Annual Average 2009
+Winter 2009-10
+Summer 2010
+2-Year Summer Average 2009-2010
+Annual Average 2010
+2010
+Winter 2010-11
+Summer 2011
+2009-2011
+Annual Average 2011
+2011
+Winter 2011-12
+Summer 2012
+Annual Average 2012
+Winter 2012-13
+Summer 2013
+Annual Average 2013
+2013
+Winter 2013-14
+Summer 2014
+2012-2014
+Annual Average 2014
+2014
+Winter 2014-15
+Summer 2015
+Annual Average 2015
+2015
+Winter 2015-16
+Summer 2016
+Annual Average 2016
+Winter 2016-17
+Summer 2017
+2015-2017
+Annual Average 2017
+Winter 2017-18
+Summer 2018
+Annual Average 2018
+Winter 2018-19
+Summer 2019
+2017-2019
+Annual Average 2019
+2019
+Winter 2019-20
+Summer 2020
+Annual Average 2020
+Winter 2020-21
+Summer 2021
+Annual Average 2021
+Winter 2021-22
+Summer 2022
+Annual Average 2022
+""".splitlines()
+
+time_mappings = {time_order[time]: time for time in range(len(time_order))}
+
+# Add time_order column for sorting
+sorted_data = data.with_columns(
+    pl.col("Time Period").replace(time_mappings).str.to_integer().alias("time_order")
+).sort("time_order")
 
 # Group by time period and location
-trends = data.group_by(["Name", "Geo Place Name", "Time Period"]).agg([
-    pl.col("Data Value").mean().alias("avg_value"),
-    pl.col("Data Value").quantile(0.95).alias("peak_value")
-])
+trends = (sorted_data
+    .group_by(["time_order", "Name", "Geo Place Name", "Time Period"])
+    .agg([
+        pl.col("Data Value").mean().alias("avg_value"),
+        pl.col("Data Value").quantile(0.95).alias("peak_value")
+    ])
+    .sort("time_order")
+)
 
 # Calculate year-over-year changes
 trends_analysis = (trends
-    .sort(['Name', 'Geo Place Name', 'Time Period'])
+    .sort(["time_order", "Name", "Geo Place Name", "Time Period"])
     .with_columns([
-        pl.col('avg_value').diff().over(['Name', 'Geo Place Name']).alias('value_change'),
-        pl.col('avg_value').pct_change().over(['Name', 'Geo Place Name']).alias('pct_change')
+        pl.col("avg_value").diff().over(["Name", "Geo Place Name"]).alias("value_change"),
+        pl.col("avg_value").pct_change().over(["Name", "Geo Place Name"]).alias("pct_change")
     ])
 )
 
-# Visualize trends
+# Ensure x-axis categories are sorted in chronological order using time_order
 def plot_trends(trends_data: pl.DataFrame, pollutant_name: str):
-    filtered = trends_data.filter(pl.col('Name') == pollutant_name).to_pandas()
-    fig = px.line(filtered, 
-                  x='Time Period',
-                  y='avg_value',
-                  color='Geo Place Name',
-                  title=f'Trends for {pollutant_name}')
+    # Filter the data for the given pollutant
+    filtered = trends_data.filter(pl.col("Name") == pollutant_name)
+    
+    # Convert the filtered data to pandas
+    df = filtered.to_pandas()
+
+    # Ensure the data is sorted by 'time_order'
+    df = df.sort_values('time_order')
+
+    # Extract sorted 'Time Period' values based on 'time_order'
+    time_periods = df.sort_values('time_order')['Time Period'].unique()
+
+    # Create the line plot using Plotly
+    fig = px.line(df, 
+                  x="Time Period",
+                  y="avg_value",
+                  color="Geo Place Name",
+                  title=f"Trends for {pollutant_name}")
+    
+    # Set custom sorting order for x-axis
+    fig.update_layout(
+        xaxis={
+            'categoryorder': 'array',
+            'categoryarray': time_periods
+        }
+    )
+    
+    # Rotate x-axis labels for readability
+    fig.update_xaxes(tickangle=45)
+    
     return fig
 
+# List of pollutants to visualize
 pollutants = [
     "Fine particles (PM 2.5)", "Ozone (O3)", "Nitrogen dioxide (NO2)",
     "Boiler Emissions- Total NOx Emissions", "Boiler Emissions- Total PM2.5 Emissions",
     "Boiler Emissions- Total SO2 Emissions"
 ]
 
+# Generate figures for each pollutant
 figures = []
 for pollutant in pollutants:
     figures.append(plot_trends(trends_analysis, pollutant))
 
+# Set up the Dash app
 app = dash.Dash(__name__)
 
 app.layout = dash.html.Div([
     dash.html.Div([
         dash.html.Div([
             dash.dcc.Graph(
-                id=f'graph-{i}',
+                id=f"graph-{i}",
                 figure=figures[i],
-                style={'width': '50%', 'display': 'inline-block'}
+                style={"width": "50%", "display": "inline-block"}
             ),
             dash.dcc.Graph(
-                id=f'graph-{i+1}',
+                id=f"graph-{i+1}",
                 figure=figures[i+1] if i+1 < len(figures) else {},
-                style={'width': '50%', 'display': 'inline-block'}
+                style={"width": "50%", "display": "inline-block"}
             )
         ])
         for i in range(0, len(figures), 2)
-    ], style={'height': '100vh', 'overflowY': 'scroll'})
+    ], style={"height": "100vh", "overflowY": "scroll"})
 ])
 
-
-# if __name__ == '__main__':
-#     app.run_server(debug=True)
+if __name__ == "__main__":
+    app.run_server(debug=True)
