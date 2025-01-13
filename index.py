@@ -186,5 +186,8 @@ app.layout = dash.html.Div([
 
 server = app.server
 
+for i in range(len(figures)):
+    figures[i].write_html(f"figure{i}.html")
+
 if __name__ == "__main__":
     app.run_server(debug=True)
