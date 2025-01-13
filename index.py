@@ -1,6 +1,6 @@
 import polars as pl
 import plotly.express as px
-import dash
+import dash, json
 
 # Load CSV
 data = pl.read_csv("Air_Quality.csv")
@@ -166,7 +166,7 @@ for pollutant in pollutants:
 # Set up the Dash app
 app = dash.Dash(__name__)
 
-app.layout = dash.html.Div([
+layout = dash.html.Div([
     dash.html.Div([
         dash.html.Div([
             dash.dcc.Graph(
@@ -183,11 +183,9 @@ app.layout = dash.html.Div([
         for i in range(0, len(figures), 2)
     ], style={"height": "100vh", "overflowY": "scroll"})
 ])
+app.layout = layout
 
 server = app.server
-
-for i in range(len(figures)):
-    figures[i].write_html(f"figure{i}.html")
 
 if __name__ == "__main__":
     app.run_server(debug=True)

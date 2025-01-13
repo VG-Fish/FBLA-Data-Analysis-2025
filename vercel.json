@@ -2,17 +2,14 @@
     "version": 2,
     "builds": [
       {
-        "src": "main.py",
-        "use": "@vercel/python",
-        "config": {
-          "excludeFiles": ["index.py"]
-        }
+        "src": "deployment/main.py",
+        "use": "@vercel/python"
       }
     ],
     "routes": [
       {
         "src": "(.*)",
-        "dest": "main.py"
+        "dest": "deployment/main.py"
       }
     ]
   }
