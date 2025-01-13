@@ -11,7 +11,7 @@ def read_html_file(file_path):
 app.layout = html.Div([
     html.H1("Graphs"),
     dbc.Row([
-        dbc.Col(html.Iframe(srcDoc=read_html_file(f'deployment/figure{i}.html'), style={'width': '100%', 'height': '400px'}), 
+        dbc.Col(html.Iframe(srcDoc=read_html_file(f'figure{i}.html'), style={'width': '100%', 'height': '400px'}), 
                 width=6, className='mb-4')
         for i in range(6)
     ])
