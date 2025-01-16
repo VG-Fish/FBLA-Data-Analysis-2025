@@ -1,6 +1,6 @@
 import polars as pl
 import plotly.express as px
-import dash, json
+import dash, requests
 
 # Load CSV
 data = pl.read_csv("Air_Quality.csv")
@@ -116,29 +116,48 @@ trends_analysis = (trends
         pl.col("avg_value").pct_change().over(["Name", "Geo Place Name"]).alias("pct_change")
     ])
 )
+ROLLING_MEAN = 13_750
+from typing import List
+# Plots trends and gets Gemini analysis
+def plot(trends_data: pl.DataFrame, pollutant_name: str):
+    gemini_data: pl.Series = trends_data.columns, trends_data["avg_value"].rolling_mean(window_size=ROLLING_MEAN).drop_nulls().round(2).to_list()
 
-# Ensure x-axis categories are sorted in chronological order using time_order
-def plot_trends(trends_data: pl.DataFrame, pollutant_name: str):
-    # Filter the data for the given pollutant
-    filtered = trends_data.filter(pl.col("Name") == pollutant_name)
+    fig = plot_trends(trends_data, pollutant_name)
     
-    # Convert the filtered data to pandas
+    try:
+        analysis = get_gemini_analysis(gemini_data, pollutant_name)
+    except Exception as e:
+        print(f"Error getting Gemini analysis: {e}")
+        analysis = "Analysis unavailable"
+
+    return (fig, analysis)
+
+# Getting Gemini's analysis
+def get_gemini_analysis(trends_data: List[float], pollutant_name: str):
+    GEMINI_URL = f"""
+    https://nova-motors-server.vercel.app/gemini?prompt=
+Here's some data from an air quality dataset for New York City (it's the rolling mean of {ROLLING_MEAN} for avg_value)
+for this pollutant: {pollutant_name}. The data: {trends_data[1]}. Provide easy-to-understand analysis. Be brief, honest, and precise. 
+Assume the standard units for each pollutant. Don't ask for more information or context.
+    """
+    response = requests.get(GEMINI_URL).json()
+    analysis = response["candidates"][0]["content"]["parts"][0]["text"]
+
+    return analysis
+
+# Plotting the trends
+def plot_trends(trends_data: pl.DataFrame, pollutant_name: str):
+    filtered = trends_data.filter(pl.col("Name") == pollutant_name)
     df = filtered.to_pandas()
-
-    # Ensure the data is sorted by 'time_order'
     df = df.sort_values('time_order')
-
-    # Extract sorted 'Time Period' values based on 'time_order'
     time_periods = df.sort_values('time_order')['Time Period'].unique()
 
-    # Create the line plot using Plotly
     fig = px.line(df, 
                   x="Time Period",
                   y="avg_value",
                   color="Geo Place Name",
                   title=f"Trends for {pollutant_name}")
     
-    # Set custom sorting order for x-axis
     fig.update_layout(
         xaxis={
             'categoryorder': 'array',
@@ -149,43 +168,41 @@ def plot_trends(trends_data: pl.DataFrame, pollutant_name: str):
     for trace in fig.data:
         trace.visible = "legendonly"
     
-    # Rotate x-axis labels for readability
     fig.update_xaxes(tickangle=45)
     
     return fig
 
-# List of pollutants to visualize
+# Getting all the graphs
 pollutants = [
     "Fine particles (PM 2.5)", "Ozone (O3)", "Nitrogen dioxide (NO2)",
     "Boiler Emissions- Total NOx Emissions", "Boiler Emissions- Total PM2.5 Emissions",
     "Boiler Emissions- Total SO2 Emissions"
 ]
 
-# Generate figures for each pollutant
 figures = []
 for pollutant in pollutants:
-    figures.append(plot_trends(trends_analysis, pollutant))
+    figures.append(plot(trends_analysis, pollutant))
 
-# Set up the Dash app
+# Setting up the Dash app
 app = dash.Dash(__name__)
 
 layout = dash.html.Div([
+    dash.html.H1("Click on the legend to see all the values.", style={"color": "#81A4CD", "text-align": "center"}),
     dash.html.Div([
         dash.html.Div([
-            dash.dcc.Graph(
-                id=f"graph-{i}",
-                figure=figures[i],
-                style={"width": "50%", "display": "inline-block"}
-            ),
-            dash.dcc.Graph(
-                id=f"graph-{i+1}",
-                figure=figures[i+1] if i+1 < len(figures) else {},
-                style={"width": "50%", "display": "inline-block"}
-            )
-        ])
+            dash.html.Div([
+                dash.html.P(f"AI Analysis: {figures[i][1]}", style={"color": "#595758", "text-align": "center"}),
+                dash.dcc.Graph(id=f"graph-{i}", figure=figures[i][0])
+            ], style={"width": "50%", "display": "inline-block", "verticalAlign": "top"}),
+            dash.html.Div([
+                dash.html.P(f"AI Analysis: {figures[i+1][1]}", style={"color": "#595758", "text-align": "center"}),
+                dash.dcc.Graph(id=f"graph-{i+1}", figure=figures[i+1][0] if i+1 < len(figures) else {})
+            ], style={"width": "50%", "display": "inline-block", "verticalAlign": "top"})
+        ], style={"display": "flex", "flexWrap": "nowrap"})
         for i in range(0, len(figures), 2)
-    ], style={"height": "100vh", "overflowY": "scroll"})
+    ], style={"height": "100vh", "overflowY": "auto"})
 ])
+
 app.layout = layout
 
 if __name__ == "__main__":
