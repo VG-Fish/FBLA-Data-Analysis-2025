@@ -25,3 +25,5 @@ loaded_layout = load_layout_from_json("layout.json")
 
 app.layout = loaded_layout
 server = app.server
+
+app.run()

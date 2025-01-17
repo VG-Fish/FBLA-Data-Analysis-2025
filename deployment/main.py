@@ -100,7 +100,7 @@ sorted_data = data.with_columns(
 
 # Group by time period and location
 trends = (sorted_data
-    .group_by(["time_order", "Name", "Geo Place Name", "Time Period"])
+    .group_by(["time_order", "Name", "Geo Place Name", "Time Period", "Measure Info"])
     .agg([
         pl.col("Data Value").mean().alias("avg_value"),
         pl.col("Data Value").quantile(0.95).alias("peak_value")
@@ -145,11 +145,16 @@ Assume the standard units for each pollutant. Don't ask for more information or 
     return analysis
 
 # Plotting the trends
+# Plotting the trends with units
 def plot_trends(trends_data: pl.DataFrame, pollutant_name: str):
     filtered = trends_data.filter(pl.col("Name") == pollutant_name)
     df = filtered.to_pandas()
     df = df.sort_values('time_order')
     time_periods = df.sort_values('time_order')['Time Period'].unique()
+
+    measure = filtered["Measure Info"].unique().to_list()
+    measure = measure[0] if len(measure) > 0 else None
+    unit = measure if measure else ""
 
     fig = px.line(df, 
                   x="Time Period",
@@ -161,7 +166,8 @@ def plot_trends(trends_data: pl.DataFrame, pollutant_name: str):
         xaxis={
             'categoryorder': 'array',
             'categoryarray': time_periods
-        }
+        },
+        yaxis_title=f"Average Value/Mean ({unit})"
     )
 
     for trace in fig.data:
@@ -177,7 +183,7 @@ graph_names = [
     "Cardiovascular hospitalizations due to PM2.5 (age 40+)", "Deaths due to PM2.5", "Ozone (O3)", "Asthma hospitalizations due to Ozone", 
     "Cardiac and respiratory deaths due to Ozone", "Asthma emergency departments visits due to Ozone", "Nitrogen dioxide (NO2)",
     "Boiler Emissions- Total NOx Emissions", "Boiler Emissions- Total PM2.5 Emissions", "Outdoor Air Toxics - Benzene", "Outdoor Air Toxics - Formaldehyde"
-    "Boiler Emissions- Total SO2 Emissions", "Deaths due to PM2.5", "Annual vehicle miles traveled (trucks)", "Annual vehicle miles traveled",
+    "Boiler Emissions- Total SO2 Emissions", "Annual vehicle miles traveled (trucks)", "Annual vehicle miles traveled",
     "Annual vehicle miles traveled (cars)"
 ]
 
@@ -200,7 +206,7 @@ layout = dash.html.Div([
             ], style={"width": "48%", "display": "inline-block", "verticalAlign": "top", "padding": "10px"}),
             dash.html.Div([
                 dash.html.H3("Big Picture: ", style={"display": "inline-block", "margin-right": "10px", "vertical-align": "middle"}),
-                dash.html.P(f"{figures[i+1][1]}", style={"display": "inline-block", "color": "#595758", "text-align": "center", "vertical-align": "middle"}),
+                dash.html.P(f"{figures[i+1][1] if i+1 < len(figures) else 'No Analysis Available.'}", style={"display": "inline-block", "color": "#595758", "text-align": "center", "vertical-align": "middle"}),
                 dash.dcc.Graph(id=f"graph-{i+1}", figure=figures[i+1][0] if i+1 < len(figures) else {})
             ], style={"width": "48%", "display": "inline-block", "verticalAlign": "top", "padding": "10px"})
         ], style={"display": "flex", "flexWrap": "wrap", "justifyContent": "space-between", "gap": "20px"})  
