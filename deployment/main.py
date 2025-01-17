@@ -116,7 +116,7 @@ trends_analysis = (trends
         pl.col("avg_value").pct_change().over(["Name", "Geo Place Name"]).alias("pct_change")
     ])
 )
-ROLLING_MEAN = 13_750
+ROLLING_MEAN = 13_800
 # Plots trends and gets Gemini analysis
 def plot(trends_data: pl.DataFrame, pollutant_name: str):
     gemini_data: pl.Series = trends_data.columns, trends_data["avg_value"].rolling_mean(window_size=ROLLING_MEAN).drop_nulls().round(2).to_list()
@@ -137,7 +137,8 @@ def get_gemini_analysis(trends_data, pollutant_name: str):
     https://nova-motors-server.vercel.app/gemini?prompt=
 Here's some data from an air quality dataset for New York City (it's the rolling mean of {ROLLING_MEAN} for avg_value)
 for this pollutant: {pollutant_name}. The data: {trends_data[1]}. Provide easy-to-understand analysis. Be brief, honest, and precise. 
-Assume the standard units for each pollutant. Don't ask for more information or context.
+Assume the standard units for each pollutant. Provide some recommendations. ASSUME NO FURTHER INFORMATION; DON'T MENTION WANTING FURTHER INFORMATION. 
+DON'T USE MARKDOWN, RESPOND WITH PLAIN TEXT.
     """
     response = requests.get(GEMINI_URL).json()
     analysis = response["candidates"][0]["content"]["parts"][0]["text"]
