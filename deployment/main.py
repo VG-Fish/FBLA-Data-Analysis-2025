@@ -189,7 +189,8 @@ for name in graph_names:
 app = dash.Dash(__name__)
 
 layout = dash.html.Div([
-    dash.html.H1("Click on the legend to see all the values.", style={"color": "#81A4CD", "text-align": "center"}),
+    dash.html.H1("New York AIRR Report", style={"color": "#04A777", "text-align": "center"}),
+    dash.html.H2("Click on the legend to see all the values.", style={"color": "#81A4CD", "text-align": "center"}),
     dash.html.Div([
         dash.html.Div([
             dash.html.Div([
