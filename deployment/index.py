@@ -1,3 +1,3 @@
-from main import server
+from deploy import server
 
 app = server

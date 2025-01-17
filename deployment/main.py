@@ -1,6 +1,6 @@
 import polars as pl
 import plotly.express as px
-import dash, requests
+import dash, requests, json
 
 # Load CSV
 data = pl.read_csv("Air_Quality.csv")
@@ -204,4 +204,6 @@ layout = dash.html.Div([
 
 app.layout = layout
 
-server = app.server
+layout_dict = layout.to_plotly_json()
+with open("layout.json", "w") as f:
+    json.dump(layout_dict, f, indent=4)
