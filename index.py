@@ -1,6 +1,7 @@
 import polars as pl
 import plotly.express as px
 import dash, requests
+from typing import List
 
 # Load CSV
 data = pl.read_csv("Air_Quality.csv")
@@ -110,14 +111,13 @@ trends = (sorted_data
 
 # Calculate year-over-year changes
 trends_analysis = (trends
-    .sort(["time_order", "Name", "Geo Place Name", "Time Period"])
+    .sort(["time_order", "Name", "Geo Place Name"])
     .with_columns([
         pl.col("avg_value").diff().over(["Name", "Geo Place Name"]).alias("value_change"),
         pl.col("avg_value").pct_change().over(["Name", "Geo Place Name"]).alias("pct_change")
     ])
 )
 ROLLING_MEAN = 13_750
-from typing import List
 # Plots trends and gets Gemini analysis
 def plot(trends_data: pl.DataFrame, pollutant_name: str):
     gemini_data: pl.Series = trends_data.columns, trends_data["avg_value"].rolling_mean(window_size=ROLLING_MEAN).drop_nulls().round(2).to_list()
@@ -204,6 +204,16 @@ layout = dash.html.Div([
 ])
 
 app.layout = layout
+
+
+""" To save the website
+import json
+import plotly
+
+layout_json = layout.to_plotly_json()
+
+with open('deployment/layout.json', 'w', encoding='UTF-8') as json_file:
+    json.dump(layout_json, json_file, cls=plotly.utils.PlotlyJSONEncoder)"""
 
 if __name__ == "__main__":
     app.run_server(debug=True)
