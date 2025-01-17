@@ -172,7 +172,7 @@ def plot_trends(trends_data: pl.DataFrame, pollutant_name: str):
     return fig
 
 # Getting all the graphs
-pollutants = [
+graph_names = [
     "Fine particles (PM 2.5)", "Asthma emergency department visits due to PM2.5", "Respiratory hospitalizations due to PM2.5 (age 20+)",
     "Cardiovascular hospitalizations due to PM2.5 (age 40+)", "Deaths due to PM2.5", "Ozone (O3)", "Asthma hospitalizations due to Ozone", 
     "Cardiac and respiratory deaths due to Ozone", "Asthma emergency departments visits due to Ozone", "Nitrogen dioxide (NO2)",
@@ -182,8 +182,8 @@ pollutants = [
 ]
 
 figures = []
-for pollutant in pollutants:
-    figures.append(plot(trends_analysis, pollutant))
+for name in graph_names:
+    figures.append(plot(trends_analysis, name))
 
 # Setting up the Dash app
 app = dash.Dash(__name__)
@@ -196,15 +196,15 @@ layout = dash.html.Div([
                 dash.html.H3("Big Picture: ", style={"display": "inline-block", "margin-right": "10px", "vertical-align": "middle"}),
                 dash.html.P(f"{figures[i][1]}", style={"display": "inline-block", "color": "#595758", "text-align": "center", "vertical-align": "middle"}),
                 dash.dcc.Graph(id=f"graph-{i}", figure=figures[i][0])
-            ], style={"width": "48%", "display": "inline-block", "verticalAlign": "top", "padding": "10px"}),  # Slightly reduced width to fit two per row
+            ], style={"width": "48%", "display": "inline-block", "verticalAlign": "top", "padding": "10px"}),
             dash.html.Div([
                 dash.html.H3("Big Picture: ", style={"display": "inline-block", "margin-right": "10px", "vertical-align": "middle"}),
                 dash.html.P(f"{figures[i+1][1]}", style={"display": "inline-block", "color": "#595758", "text-align": "center", "vertical-align": "middle"}),
                 dash.dcc.Graph(id=f"graph-{i+1}", figure=figures[i+1][0] if i+1 < len(figures) else {})
-            ], style={"width": "48%", "display": "inline-block", "verticalAlign": "top", "padding": "10px"})  # Slightly reduced width to fit two per row
-        ], style={"display": "flex", "flexWrap": "wrap", "justifyContent": "space-between", "gap": "20px"})  # Adjusted gap for spacing
+            ], style={"width": "48%", "display": "inline-block", "verticalAlign": "top", "padding": "10px"})
+        ], style={"display": "flex", "flexWrap": "wrap", "justifyContent": "space-between", "gap": "20px"})  
         for i in range(0, len(figures), 2)
-    ], style={"height": "100vh", "overflowY": "auto", "padding": "20px"})  # Added padding for overall layout
+    ], style={"height": "100vh", "overflowY": "auto", "padding": "20px"})
 ])
 
 app.layout = layout
