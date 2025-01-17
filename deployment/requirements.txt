@@ -1,5 +1,4 @@
-dash>=2.18.2
-dash_bootstrap_components>=1.6.0
-polars>=1.19.0
-requests>=2.32.2
-plotly>=5.24.1
+dash[core]==2.18.2
+polars==1.19.0
+requests==2.32.2
+plotly==5.24.1

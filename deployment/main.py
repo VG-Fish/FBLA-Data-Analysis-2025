@@ -1,7 +1,6 @@
 import polars as pl
 import plotly.express as px
 import dash, requests
-from typing import List
 
 # Load CSV
 data = pl.read_csv("Air_Quality.csv")
@@ -133,7 +132,7 @@ def plot(trends_data: pl.DataFrame, pollutant_name: str):
     return (fig, analysis)
 
 # Getting Gemini's analysis
-def get_gemini_analysis(trends_data: List[float], pollutant_name: str):
+def get_gemini_analysis(trends_data, pollutant_name: str):
     GEMINI_URL = f"""
     https://nova-motors-server.vercel.app/gemini?prompt=
 Here's some data from an air quality dataset for New York City (it's the rolling mean of {ROLLING_MEAN} for avg_value)
