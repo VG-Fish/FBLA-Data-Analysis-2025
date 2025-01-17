@@ -205,15 +205,4 @@ layout = dash.html.Div([
 
 app.layout = layout
 
-
-""" To save the website
-import json
-import plotly
-
-layout_json = layout.to_plotly_json()
-
-with open('deployment/layout.json', 'w', encoding='UTF-8') as json_file:
-    json.dump(layout_json, json_file, cls=plotly.utils.PlotlyJSONEncoder)"""
-
-if __name__ == "__main__":
-    app.run_server()
+server = app.server
