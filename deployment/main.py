@@ -182,7 +182,7 @@ graph_names = [
     "Fine particles (PM 2.5)", "Asthma emergency department visits due to PM2.5", "Respiratory hospitalizations due to PM2.5 (age 20+)",
     "Cardiovascular hospitalizations due to PM2.5 (age 40+)", "Deaths due to PM2.5", "Ozone (O3)", "Asthma hospitalizations due to Ozone", 
     "Cardiac and respiratory deaths due to Ozone", "Asthma emergency departments visits due to Ozone", "Nitrogen dioxide (NO2)",
-    "Boiler Emissions- Total NOx Emissions", "Boiler Emissions- Total PM2.5 Emissions", "Outdoor Air Toxics - Benzene", "Outdoor Air Toxics - Formaldehyde"
+    "Boiler Emissions- Total NOx Emissions", "Boiler Emissions- Total PM2.5 Emissions", "Outdoor Air Toxics - Benzene", "Outdoor Air Toxics - Formaldehyde",
     "Boiler Emissions- Total SO2 Emissions", "Annual vehicle miles traveled (trucks)", "Annual vehicle miles traveled",
     "Annual vehicle miles traveled (cars)"
 ]
